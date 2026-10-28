@@ -185,6 +185,17 @@ details.hint summary{font-weight:900;letter-spacing:.06em;text-transform:upperca
 .town-chip{display:inline-block;border:1px solid #8fe6a3;color:#8fe6a3;padding:3px 6px;font-size:.65rem;margin:2px}
 @media(max-width:430px){.town-grid{grid-template-columns:1fr}.town-npc{padding:8px}}
 
+
+/* Expanded combat hotbar and combat feedback */
+.combat-hotbar{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.combat-hotbar button{flex:1 1 105px;min-height:36px;border:2px solid #65718e;border-radius:0;background:#141b2a;color:#ffdc83;font:900 .68rem ui-monospace,monospace;text-transform:uppercase;box-shadow:2px 2px 0 #05070c}
+.combat-hotbar button:active{transform:translate(1px,1px);box-shadow:none}
+.combat-hotbar button:disabled{opacity:.45}
+.combat-tip{font-size:.68rem;color:#a6b0cc;margin:5px 0}
+.combat-readout{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
+.combat-readout span{font-size:.65rem;padding:4px 6px;border:1px solid #46506a;background:#0b0f19;color:#ffdc83}
+@media(max-width:430px){.combat-hotbar{gap:4px}.combat-hotbar button{flex-basis:calc(50% - 4px);font-size:.62rem;min-height:34px}}
+
 </style>
 </head>
 <body>
@@ -430,6 +441,71 @@ const townBaseInteract=interact;
 interact=function(){const before=game&&game.floor;townBaseInteract();if(game&&before!==undefined&&game.floor>before)townQuestProgress('floors',1)};
 const townToolbar=document.querySelector('.stage>.toolbar');
 if(townToolbar&&!document.getElementById('townBtnGame')){const b=document.createElement('button');b.id='townBtnGame';b.textContent='Town & Quests';b.addEventListener('click',openTown);townToolbar.appendChild(b)}
+
+
+/* Combat expansion: stamina-based weapon moves, bombs, mastery and contextual interactions. */
+const COMBAT_WEAPONS={
+ sword:{name:'Sword',heavy:'Cleave',heavyCost:24,spin:'Blade Tempest',spinCost:34,range:2.25,mult:1.8},
+ daggers:{name:'Twin Daggers',heavy:'Flurry',heavyCost:20,spin:'Shadow Dance',spinCost:30,range:1.7,mult:1.35},
+ axe:{name:'Grave Axe',heavy:'Sundering Chop',heavyCost:28,spin:'Reaper Sweep',spinCost:36,range:2.5,mult:2.15},
+ bow:{name:'Crypt Bow',heavy:'Piercing Shot',heavyCost:22,spin:'Fan of Arrows',spinCost:32,range:7,mult:1.7},
+ staff:{name:'Runic Staff',heavy:'Arcane Lance',heavyCost:24,spin:'Nova Pulse',spinCost:36,range:6,mult:1.8}
+};
+function combatWeapon(){return COMBAT_WEAPONS[(game&&game.player&&game.player.weaponStyle)||'sword']||COMBAT_WEAPONS.sword}
+function combatReady(cost){if(!game||paused||dead)return false;const p=game.player;p.stamina=Number.isFinite(p.stamina)?p.stamina:100;if(p.stamina<cost){log('Not enough stamina. Need '+cost+'.');return false}p.stamina-=cost;return true}
+function heavyAttack(){
+ if(!game||paused||dead)return;const p=game.player,w=combatWeapon();if(!combatReady(w.heavyCost))return;
+ attackFlash=.25;let hits=0;const ranged=['bow','staff'].includes(p.weaponStyle);
+ const targets=game.enemies.filter(e=>e.hp>0&&lineOfSight(p.x,p.y,e.x,e.y)&&dist(p,e)<=(ranged?w.range:w.range)&& (ranged||Math.abs(norm(Math.atan2(e.y-p.y,e.x-p.x)-p.a))<.85)).sort((a,b)=>dist(p,a)-dist(p,b));
+ if(ranged&&targets.length)targets.splice(1);
+ for(const e of targets){const dmg=Math.max(1,Math.floor((p.damage+(p.weaponBonus||0))*w.mult+(p.skills?.power||0)*2));e.hp-=dmg;e.stun=Math.max(e.stun||0,p.weaponStyle==='axe'?.9:.55);if(p.weaponStyle==='staff'){e.burn=Math.max(e.burn||0,3);e.burnTick=.5}if(p.weaponStyle==='bow')e.poison=Math.max(e.poison||0,2);hits++;log(w.heavy+' hits '+e.type+' for '+dmg+'.');if(e.hp<=0)killEnemy(e)}
+ if(!hits)log(w.heavy+': no target in range.');sound(p.weaponStyle==='staff'?720:210,.14,'sawtooth');updateHUD();
+}
+function whirlwindAttack(){
+ if(!game||paused||dead)return;const p=game.player,w=combatWeapon();if(!combatReady(w.spinCost))return;
+ attackFlash=.32;let hits=0;const radius=['bow','staff'].includes(p.weaponStyle)?3.1:2.0;
+ for(const e of [...game.enemies]){if(e.hp<=0||dist(p,e)>radius)continue;const dmg=Math.max(1,Math.floor((p.damage+(p.weaponBonus||0))*w.mult*.72));e.hp-=dmg;e.stun=Math.max(e.stun||0,.8);if(p.weaponStyle==='staff'){e.burn=Math.max(e.burn||0,2.5);e.burnTick=.5}hits++;log(w.spin+' strikes '+e.type+' for '+dmg+'.');if(e.hp<=0)killEnemy(e)}
+ if(!hits)log(w.spin+': no enemies close enough.');else sound(440,.22,'triangle');updateHUD();
+}
+function throwBomb(){
+ if(!game||paused||dead)return;const p=game.player;
+ if((p.craftingShards||0)>0)p.craftingShards--;else if(p.gold>=15)p.gold-=15;else{log('Bomb needs 1 crafting shard or 15 gold.');return}
+ const target=game.enemies.filter(e=>e.hp>0&&lineOfSight(p.x,p.y,e.x,e.y)&&dist(p,e)<7).sort((a,b)=>dist(p,a)-dist(p,b))[0];
+ if(!target){if((p.craftingShards||0)>=0){if(p.craftingShards!==undefined&&p.craftingShards>=0&&p._bombRefund){p.craftingShards++;p._bombRefund=false}else{p.gold+=15}}log('No target in bomb range.');return}
+ const x=target.x,y=target.y;let hits=0;for(const e of [...game.enemies])if(e.hp>0&&Math.hypot(e.x-x,e.y-y)<2.15){const dmg=Math.max(1,Math.floor((p.damage+(p.weaponBonus||0))*1.25));e.hp-=dmg;e.stun=Math.max(e.stun||0,1.1);hits++;log('Bomb blasts '+e.type+' for '+dmg+'.');if(e.hp<=0)killEnemy(e)}
+ sound(90,.25,'square');log('Bomb detonated. '+hits+' enemy target(s) caught in the blast.');updateHUD();
+}
+function cycleWeaponStyle(){
+ if(!game||paused||dead)return;const p=game.player,styles=['sword','daggers','axe','bow','staff'],i=styles.indexOf(p.weaponStyle||'sword');p.weaponStyle=styles[(i+1)%styles.length];p.weapon=({sword:'Delver Sword',daggers:'Twin Daggers',axe:'Grave Axe',bow:'Crypt Bow',staff:'Runic Staff'})[p.weaponStyle];log('Weapon stance changed: '+combatWeapon().name+'. Damage bonus remains '+(p.weaponBonus||0)+'.');updateHUD();
+}
+function openWeaponManual(){
+ if(!game){showDialog('start');return}paused=true;running=false;
+ const p=game.player,w=combatWeapon(),d=$('dialog');
+ d.innerHTML='<div class="eyebrow">Field manual · combat techniques</div><h1>WEAPON MASTERY</h1><p>Current stance: <b class="gold">'+w.name+'</b>. Your equipped weapon bonuses and rarity are preserved when changing stance.</p><div class="inventory">'+Object.keys(COMBAT_WEAPONS).map(k=>{const x=COMBAT_WEAPONS[k];return '<div class="item"><span>'+x.name+'<small>'+x.heavy+' · '+x.heavyCost+' stamina<br>'+x.spin+' · '+x.spinCost+' stamina</small></span><button data-stance="'+k+'">'+(p.weaponStyle===k?'Equipped':'Use stance')+'</button></div>'}).join('')+'</div><p class="combat-tip">Heavy attack: X · Area technique: V · Bomb: G · Cycle stance: Z. Stamina regenerates while you explore.</p><div class="actions"><button id="manualBomb">Craft / throw bomb</button><button class="primary" id="manualClose">Return to game</button></div>';
+ $('overlay').classList.remove('hidden');d.querySelectorAll('[data-stance]').forEach(b=>b.onclick=()=>{p.weaponStyle=b.dataset.stance;p.weapon=({sword:'Delver Sword',daggers:'Twin Daggers',axe:'Grave Axe',bow:'Crypt Bow',staff:'Runic Staff'})[p.weaponStyle];openWeaponManual()});
+ $('manualBomb').onclick=()=>{paused=false;running=true;$('overlay').classList.add('hidden');throwBomb();openWeaponManual()};
+ $('manualClose').onclick=()=>{paused=false;running=true;$('overlay').classList.add('hidden');last=performance.now();updateHUD();requestAnimationFrame(loop)};
+}
+function installCombatControls(){
+ const pad=document.querySelector('.actions-pad');if(!pad||document.getElementById('heavyBtn'))return;
+ const bar=document.createElement('div');bar.className='combat-hotbar';bar.innerHTML='<button id="heavyBtn" title="Heavy attack · X">⚔ Heavy (X)</button><button id="spinBtn" title="Area technique · V">✦ Special (V)</button><button id="bombBtn" title="Bomb · G">✹ Bomb (G)</button><button id="weaponManualBtn" title="Weapon mastery and stances">♜ Weapons (Z)</button>';
+ pad.appendChild(bar);
+ const read=document.createElement('div');read.className='combat-readout';read.id='combatReadout';read.innerHTML='<span id="weaponStyleLabel">STANCE: SWORD</span><span id="shardLabel">SHARDS: 0</span>';pad.appendChild(read);
+ document.getElementById('heavyBtn').onclick=heavyAttack;document.getElementById('spinBtn').onclick=whirlwindAttack;document.getElementById('bombBtn').onclick=throwBomb;document.getElementById('weaponManualBtn').onclick=openWeaponManual;
+}
+installCombatControls();
+const combatBaseHUD=updateHUD;
+updateHUD=function(){combatBaseHUD();if(!game)return;const p=game.player,w=combatWeapon();const a=$('weaponStyleLabel'),b=$('shardLabel'),hb=$('heavyBtn'),sb=$('spinBtn'),bb=$('bombBtn');if(a)a.textContent='STANCE: '+w.name.toUpperCase();if(b)b.textContent='SHARDS: '+(p.craftingShards||0);if(hb)hb.textContent=w.heavy+' · X';if(sb)sb.textContent=w.spin+' · V';if(bb)bb.textContent='Bomb · G ('+((p.craftingShards||0)>0?'1 shard':'15 gold')+')';if(hb)hb.disabled=(p.stamina||0)<w.heavyCost;if(sb)sb.disabled=(p.stamina||0)<w.spinCost;if(bb)bb.disabled=!((p.craftingShards||0)>0||p.gold>=15)};
+document.addEventListener('keydown',e=>{if(e.repeat||e.target?.matches?.('input,textarea,select'))return;if(e.code==='KeyX')heavyAttack();if(e.code==='KeyV')whirlwindAttack();if(e.code==='KeyG')throwBomb();if(e.code==='KeyZ')cycleWeaponStyle()});
+const combatBaseInteract=interact;
+interact=function(){
+ if(!game||paused||dead)return;const p=game.player;
+ const shrine=game.shrine&&!game.shrine.used&&Math.hypot(p.x-(game.shrine.x+.5),p.y-(game.shrine.y+.5))<1.25;
+ const sw=(game.switches||[]).some(v=>!v.used&&Math.hypot(p.x-(v.x+.5),p.y-(v.y+.5))<1.2);
+ if(shrine&&p.hp===p.maxHp&&p.stamina<100){game.shrine.used=true;p.stamina=100;log('Ancient shrine restores your stamina.');sound(620,.2,'sine');updateHUD();return}
+ if(sw&&p.craftingShards>0){p.craftingShards--;const v=game.switches.find(v=>!v.used&&Math.hypot(p.x-(v.x+.5),p.y-(v.y+.5))<1.2);if(v)v.used=true;if(game.vault)game.vault.locked=false;const vault=game.loot.find(l=>l.lockedVault&&!l.taken);if(vault)vault.lockedVault=false;log('A crafting shard powers the rune switch. Vault unlocked!');sound(560,.2,'triangle');updateHUD();return}
+ combatBaseInteract();
+};
 
 })();
 </script>
