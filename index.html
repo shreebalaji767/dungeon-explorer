@@ -37,6 +37,18 @@
 .landing-foot{text-align:center;color:#888fa9;font-size:.68rem;line-height:1.8;margin-top:20px}
 .brand-home{cursor:pointer;user-select:none;outline-offset:5px}.brand-home:hover{filter:brightness(1.25)}.brand-home:focus-visible{outline:2px solid var(--gold)}
 @media(max-width:560px){.landing-frame{padding:18px 12px}.landing-title{letter-spacing:0}.landing-scene{margin:18px auto}.landing-chip{font-size:.62rem;padding:6px}}
+
+/* Install controls and adaptive layouts */
+.topbar-tools{display:flex;align-items:center;justify-content:flex-end;gap:10px;min-width:0}
+.install-btn{border:2px solid #9cf0bc;background:#22533f;color:#f1ffe9;font-weight:900;letter-spacing:.04em;padding:11px 14px;white-space:nowrap;box-shadow:3px 3px 0 #101b18}
+.install-btn:hover{background:#2f7657}
+.install-btn[hidden]{display:none!important}
+.install-hint{min-height:1.3em;margin:8px 0 0;text-align:center;color:#b9c7e2;font-size:.78rem;line-height:1.5}
+@media(min-width:1800px){.shell{width:min(100%,1920px)}.layout{grid-template-columns:minmax(0,1fr) minmax(320px,24vw);gap:20px}.stage canvas{max-height:78vh}.panel{padding:18px}.feed{max-height:240px}}
+@media(max-width:760px){.topbar-tools{gap:6px}.topbar-tools>.subtle{display:none}.install-btn{padding:10px 11px;font-size:.76rem}.toolbar{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,115px),1fr))}.toolbar button{min-width:0;min-height:44px}.stage canvas{max-height:58dvh}.dialog{max-height:calc(100dvh - 32px)}}
+@media(max-width:430px){.topbar{align-items:center}.topbar-tools{flex-shrink:0}.install-btn{font-size:.68rem;padding:9px 8px}.brand{max-width:62%;letter-spacing:.015em;gap:7px}.brand>div:last-child{line-height:1.35}.brand .subtle{font-size:.58rem}.sigil{flex:0 0 26px;width:26px;height:26px}.landing-title{font-size:clamp(2rem,13vw,3.6rem)}.landing-kicker{letter-spacing:.1em}.landing-subtitle{letter-spacing:.06em}.landing-frame{width:100%;padding:18px 10px}.landing-actions{display:grid;grid-template-columns:1fr;gap:9px}.landing-actions button{width:100%;min-width:0;padding:13px 10px}.landing-scene{height:clamp(100px,28vw,150px)}.landing-stats{gap:5px}.landing-chip{font-size:.58rem;padding:5px 6px}.side{grid-template-columns:minmax(0,1fr)}.inventory-panel,.log-panel{grid-column:auto!important}.stage canvas{max-height:48dvh}.feature-row{align-items:flex-start}.feature-row .pill{max-width:100%;overflow-wrap:anywhere}}
+@media(max-height:560px) and (orientation:landscape){#retroLanding{align-items:start;padding:10px}.landing-frame{max-width:900px;padding:14px 22px}.landing-title{font-size:clamp(1.8rem,7vh,3.4rem);margin:8px 0}.landing-scene{height:90px;margin:8px auto}.landing-stats{margin:8px 0}.landing-actions{margin:8px 0}.landing-foot{margin-top:8px}.stage canvas{max-height:48dvh}.overlay{padding:6px}.dialog{max-height:calc(100dvh - 20px)}}
+
 </style>
 </head>
 <body>
@@ -47,12 +59,12 @@
     <div class="landing-subtitle">DESCEND INTO THE UNKNOWN<br>FIGHT · LOOT · SURVIVE</div>
     <div class="landing-scene" aria-hidden="true"><div class="moon"></div><div class="landing-mountain"></div><div class="landing-dungeon"></div><div class="landing-hero"></div></div>
     <div class="landing-stats"><span class="landing-chip">PIXEL-ART ACTION</span><span class="landing-chip">PROCEDURAL DUNGEONS</span><span class="landing-chip">PERMADEATH</span><span class="landing-chip">100% FREE</span></div>
-    <div class="landing-actions"><button id="landingPlay">▶ Enter Dungeon</button><button id="landingContinue">Continue Expedition</button></div>
+    <div class="landing-actions"><button id="landingPlay">▶ Enter Dungeon</button><button id="landingContinue">Continue Expedition</button><button id="landingInstallBtn" class="install-btn" type="button" hidden>⬇ Install App</button></div><p id="installHint" class="install-hint" role="status" aria-live="polite"></p>
     <div class="landing-foot">NO ADS · NO PAY-TO-WIN · NO ACCOUNT REQUIRED<br>BEST PLAYED WITH KEYBOARD OR TOUCH CONTROLS<br><span>PRESS ENTER TO BEGIN</span></div>
   </div>
 </div>
 <div class="shell">
-<header class="topbar"><div class="brand brand-home" id="homeLogo" role="button" tabindex="0" aria-label="Return to landing page"><div class="sigil"><span>✦</span></div><div>DUNGEON EXPLORER<div class="subtle">A FREE RETRO ROGUELITE</div></div></div><div class="subtle">PROCEDURAL DUNGEONS · PERMADEATH<br><span class="pill">NO ADS · OFFLINE READY</span></div></header>
+<header class="topbar"><div class="brand brand-home" id="homeLogo" role="button" tabindex="0" aria-label="Return to landing page"><div class="sigil"><span>✦</span></div><div>DUNGEON EXPLORER<div class="subtle">A FREE RETRO ROGUELITE</div></div></div><div class="topbar-tools"><div class="subtle">PROCEDURAL DUNGEONS · PERMADEATH<br><span class="pill">NO ADS · OFFLINE READY</span></div><button id="installAppBtn" class="install-btn" type="button" hidden>⬇ Install App</button></div></header>
 <main class="layout">
 <section>
 <div class="stage"><canvas id="view" width="480" height="300" aria-label="Top-down pixel-art dungeon game view"></canvas><div class="overlay" id="overlay"><div class="dialog" id="dialog"></div></div></div>
@@ -198,6 +210,17 @@ document.querySelectorAll('[data-hold]').forEach(b=>{const k=b.dataset.hold;cons
 document.addEventListener('contextmenu',e=>{if(e.target.closest('.mobile-controls'))e.preventDefault()});
 $('attackBtn').addEventListener('click',attack);$('useBtn').addEventListener('click',usePotion);$('interactBtn').addEventListener('click',interact);const quickstepBtn=$('quickstepBtn');quickstepBtn.addEventListener('click',()=>{if(game&&!paused&&!dead&&game.player.dashCooldown<=0)held.quickstep=true});$('mapBtn').onclick=()=>{mapVisible=!mapVisible;$('mapBtn').textContent='Map: '+(mapVisible?'On':'M')};$('invBtn').onclick=toggleInventory;$('soundBtn').onclick=()=>{soundOn=!soundOn;$('soundBtn').textContent='Sound: '+(soundOn?'On':'Off');if(soundOn)sound(440,.08)};$('pauseBtn').onclick=togglePause;$('saveBtn').onclick=()=>{if(!game||dead){log('There is no active expedition to save.');return}if(!save())return;log('Expedition saved manually.');$('saveBtn').textContent='Saved ✓';setTimeout(()=>{$('saveBtn').textContent='Save Game'},1400)};$('settingsBtn').onclick=()=>showDialog('settings');$('forgeBtn').onclick=()=>showDialog('shop');
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&game&&!paused&&!dead)togglePause()});window.addEventListener('beforeunload',()=>{});
+// Installable PWA: show a real install action only when the browser supports it.
+const installButtons=[document.getElementById('installAppBtn'),document.getElementById('landingInstallBtn')];
+const installHint=document.getElementById('installHint');
+let deferredInstallPrompt=null;
+function setInstallMessage(message){if(installHint)installHint.textContent=message;}
+function syncInstallButtons(){const standalone=window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true;installButtons.forEach(b=>{if(b)b.hidden=standalone||(!deferredInstallPrompt&&!( /iPhone|iPad|iPod/i.test(navigator.userAgent)&&!standalone));});}
+window.addEventListener('beforeinstallprompt',event=>{event.preventDefault();deferredInstallPrompt=event;syncInstallButtons();setInstallMessage('Install Dungeon Explorer for an app-like experience.');});
+window.addEventListener('appinstalled',()=>{deferredInstallPrompt=null;syncInstallButtons();setInstallMessage('Dungeon Explorer is installed. Have fun!');});
+async function requestInstall(){if(deferredInstallPrompt){deferredInstallPrompt.prompt();try{const choice=await deferredInstallPrompt.userChoice;setInstallMessage(choice.outcome==='accepted'?'Installation accepted. Follow your browser’s prompts to finish.':'Installation dismissed. You can install later from your browser menu.');}catch(_){setInstallMessage('Use your browser menu to install this app.');}deferredInstallPrompt=null;syncInstallButtons();return;}if(window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true){setInstallMessage('Dungeon Explorer is already installed.');return;}if(/iPhone|iPad|iPod/i.test(navigator.userAgent)){setInstallMessage('To install: tap Share in Safari, then “Add to Home Screen”.');return;}setInstallMessage('If Install is unavailable, open your browser menu and choose “Install app” or “Add to Home screen”.');}
+installButtons.forEach(b=>b&&b.addEventListener('click',requestInstall));
+syncInstallButtons();
 if('serviceWorker' in navigator&&location.protocol!=='file:'){window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js').catch(()=>{}))}
 showDialog('start');
 
