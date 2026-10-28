@@ -162,6 +162,16 @@ details.hint summary{font-weight:900;letter-spacing:.06em;text-transform:upperca
   .stage canvas{max-height:62dvh;max-height:62svh;aspect-ratio:16/9}
 }
 
+
+/* Tiny 16-bit HUD buttons */
+.stage>.toolbar{background:rgba(7,10,18,.52);border:1px solid #68749366;padding:3px;gap:3px;backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px)}
+.stage>.toolbar button{border:1px solid #8b9abd99!important;border-radius:0!important;background:rgba(24,32,50,.68)!important;color:#ffdc83!important;box-shadow:2px 2px 0 rgba(5,7,12,.75)!important;text-shadow:1px 1px #080b11;font-weight:900;text-transform:uppercase;letter-spacing:-.035em;min-height:22px;padding:3px 5px;font-size:9px;line-height:1;opacity:.82}
+.stage>.toolbar button:hover,.stage>.toolbar button:focus-visible{background:rgba(53,65,90,.96)!important;border-color:#ffdc83!important;color:#fff4d4!important;opacity:1;transform:translate(-1px,-1px);box-shadow:3px 3px 0 #05070c!important}
+.stage>.toolbar button:active{transform:translate(1px,1px);box-shadow:1px 1px 0 #05070c!important}
+@media(max-width:760px){.stage>.toolbar{gap:2px;padding:2px}.stage>.toolbar button{min-height:21px;padding:3px 1px;font-size:8px;letter-spacing:-.055em;box-shadow:1px 1px 0 #05070c!important}}
+@media(max-width:380px){.stage>.toolbar button{min-height:20px;padding:2px 0;font-size:7px;letter-spacing:-.065em}}
+@media(orientation:landscape) and (max-height:520px){.stage>.toolbar{gap:2px;padding:2px}.stage>.toolbar button{min-height:20px;padding:2px 1px;font-size:8px}}
+
 </style>
 </head>
 <body>
