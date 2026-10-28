@@ -124,6 +124,16 @@ details.hint summary{font-weight:900;letter-spacing:.06em;text-transform:upperca
 @media(max-width:430px){.toolbar{width:100%;margin-top:-40px;gap:3px}.toolbar button{flex:1 1 auto;font-size:.56rem;padding:4px 5px;min-height:26px}.mobile-controls{padding:6px}.controls-title{font-size:.58rem}}
 @media(max-height:560px) and (orientation:landscape){.toolbar{margin-top:-34px}.toolbar button{min-height:24px;padding:3px 5px}.mobile-controls{opacity:.82}}
 
+
+/* Keep compact action buttons directly on the gameplay screen */
+.stage{isolation:isolate}
+.stage>.toolbar{position:absolute;z-index:5;left:7px;right:7px;bottom:7px;margin:0;padding:4px;width:max-content;max-width:calc(100% - 14px);display:flex;flex-wrap:wrap;gap:4px;border:1px solid #a6b0cc44;background:#080b1170;box-shadow:none;backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px)}
+.stage>.toolbar button{flex:0 1 auto;min-width:0;min-height:24px;padding:4px 6px;font-size:clamp(.52rem,1vw,.64rem);line-height:1;border:1px solid #a6b0cc66;background:#11152170;color:#f7edc8d9;box-shadow:1px 1px 0 #05070c55;opacity:.72}
+.stage>.toolbar button:hover,.stage>.toolbar button:focus-visible{opacity:1;background:#28334bd9;border-color:#ffdc83;color:#ffedb3}
+.stage>.toolbar button:active{transform:translateY(1px);box-shadow:none}
+@media(max-width:600px){.stage>.toolbar{left:4px;right:4px;bottom:4px;padding:3px;gap:3px;max-width:calc(100% - 8px)}.stage>.toolbar button{min-height:22px;padding:3px 4px;font-size:.5rem;letter-spacing:0}}
+@media(max-width:360px){.stage>.toolbar button{font-size:.46rem;padding:3px 3px}}
+
 </style>
 </head>
 <body>
@@ -142,8 +152,8 @@ details.hint summary{font-weight:900;letter-spacing:.06em;text-transform:upperca
 <header class="topbar"><div class="brand brand-home" id="homeLogo" role="button" tabindex="0" aria-label="Return to landing page"><div class="sigil"><span>✦</span></div><div>DUNGEON EXPLORER<div class="subtle">A FREE RETRO ROGUELITE</div></div></div><div class="topbar-tools"><div class="subtle">PROCEDURAL DUNGEONS · PERMADEATH<br><span class="pill">NO ADS · OFFLINE READY</span></div><button id="installAppBtn" class="install-btn" type="button" hidden>⬇ Install App</button></div></header>
 <main class="layout">
 <section>
-<div class="stage"><canvas id="view" width="480" height="300" aria-label="Top-down pixel-art dungeon game view"></canvas><div class="overlay" id="overlay"><div class="dialog" id="dialog"></div></div></div>
-<div class="toolbar"><button id="mapBtn">Map: M</button><button id="invBtn">Inventory: I</button><button id="soundBtn">Sound: On</button><button id="pauseBtn">Pause: P</button><button id="saveBtn">Save Game</button><button id="settingsBtn">Settings</button><button id="forgeBtn">Forge & Trade</button></div>
+<div class="stage"><canvas id="view" width="480" height="300" aria-label="Top-down pixel-art dungeon game view"></canvas><div class="overlay" id="overlay"><div class="dialog" id="dialog"></div><div class="toolbar"><button id="mapBtn">Map: M</button><button id="invBtn">Inventory: I</button><button id="soundBtn">Sound: On</button><button id="pauseBtn">Pause: P</button><button id="saveBtn">Save Game</button><button id="settingsBtn">Settings</button><button id="forgeBtn">Forge & Trade</button></div></div></div>
+
 <div class="feature-row"><span class="pill" id="biomeLabel">CRYPT</span><span class="pill" id="objectiveLabel">Explore and survive</span></div>
 <div class="mobile-controls" aria-label="On-screen game controls"><div class="controls-title">Touch controls · press and hold to move · tap actions</div><div class="dpad"><button class="empty" tabindex="-1"> </button><button data-hold="forward" aria-label="Move up">▲</button><button class="empty" tabindex="-1"> </button><button data-hold="left" aria-label="Move left">◀</button><button data-hold="back" aria-label="Move backward">▼</button><button data-hold="right" aria-label="Move right">▶</button></div><div class="actions-pad"><button data-hold="strafeL" aria-label="Sidestep left">Side ◀</button><button data-hold="strafeR" aria-label="Sidestep right">Side ▶</button><button id="quickstepBtn" aria-label="Quickstep dodge">⇢ Quickstep</button><button data-hold="guard" aria-label="Hold to guard and parry">🛡 Guard</button><button id="interactBtn" aria-label="Interact or descend">E · Interact</button><button id="attackBtn" class="primary">⚔ Attack</button><button id="useBtn">✚ Potion</button></div></div>
 <details class="hint" style="margin-top:12px"><summary style="cursor:pointer;color:var(--gold)">How to play · PC keyboard & all-screen controls</summary><p><b>Move:</b> WASD or arrow keys. <b>Attack:</b> Space. <b>Quickstep:</b> hold Shift (uses stamina). <b>Guard/Parry:</b> hold R; time it just before a melee strike. <b>Interact:</b> E near a shrine or stairs. <b>Side-step:</b> Q or C. <b>Drink potion:</b> H. <b>Inventory:</b> I. <b>Map:</b> M. <b>Pause:</b> P or Esc.</p><p><b>Goal:</b> explore, defeat enemies, collect glowing loot, use shrines, and find the stairs. Every fourth floor has a guardian; defeat it to descend. Level up to choose talents. Death ends the current run.</p><p><b>Touchscreen:</b> press and hold a D-pad direction to move; you can hold one direction while tapping an action. Tap Attack, Quickstep, Interact, or Potion. Controls have large touch targets and are usable on phones and tablets in portrait or landscape. If the page scrolls, use the game controls rather than swiping the page.</p><p><b>PC:</b> use the keyboard or click the same on-screen controls with your mouse.</p></details>
