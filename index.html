@@ -180,7 +180,7 @@ showDialog=function(kind){originalLegacy(kind);if(kind==='legacy'){const d=$('di
 const originalStartGame= startGame;
 startGame=function(fromSave,mode){selectedMode=mode||(fromSave&&load()?.mode)||'standard';originalStartGame(fromSave,mode);if(game){game.mode=selectedMode;game.bossRush=selectedMode==='boss-rush';game.survival=selectedMode==='survival';if(!fromSave){const perks=metaData.perks||[];if(perks.includes('training'))game.player.weaponBonus+=2;if(perks.includes('ward')){game.player.maxHp+=10;game.player.hp+=10;}if(perks.includes('scavenger'))game.player.gold+=10;}}};
 document.addEventListener('keydown',e=>{if(e.code==='KeyF'&&!e.repeat)castAbility();});
-const skillButton=document.getElementById('skillBtn');if(skillButton)skillButton.addEventListener('click',castAbility);
+let skillButton=document.getElementById('skillBtn');if(!skillButton){skillButton=document.createElement('button');skillButton.id='skillBtn';skillButton.textContent='✦ Skill (F)';const attackButton=document.getElementById('attackBtn');if(attackButton)attackButton.after(skillButton);}if(skillButton)skillButton.addEventListener('click',castAbility);
 
 })();
 </script>
