@@ -20,7 +20,7 @@ assert.ok(!js.includes('baseKillEnemy=baseKillEnemy'), 'no accidental const self
 assert.ok(js.includes('p.stamina=Math.min(100'), 'stamina regenerates over time');
 assert.ok(js.includes('if(!save())return'), 'failed saves do not exit and lose progress');
 assert.ok(js.includes("navigation?.type==='reload'"), 'landing navigation preserves refresh behavior');
-assert.ok(sw.includes("const CACHE_NAME = 'dungeon-explorer-v5'"), 'cache version is bumped');
+assert.ok(sw.includes("const CACHE_NAME = 'dungeon-explorer-v6'"), 'cache version is bumped');
 assert.ok(js.includes("beforeinstallprompt"), 'PWA install prompt is handled');
 assert.ok(js.includes("appinstalled"), 'installed state is handled');
 assert.ok(html.includes('@media(max-width:430px)'), 'small-phone layout rules exist');
