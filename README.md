@@ -12,6 +12,7 @@ A free, single-player top-down pixel-art roguelite built with vanilla JavaScript
 - Shared daily challenge with a deterministic seed for the UTC date
 - One-use healing shrines, healing potions, equipment drops, gold bounties for clearing floors, and progression between floors
 - Level-up talent choices: Heavy Hand, Iron Heart, Quickstep, and Fortune
+- Wayfarer’s Rest town hub with four persistent NPC quest contracts, earned Legacy point rewards, and an earned-gold rest option
 - Rare relics with passive bonuses, secret caches, and lifetime records
 - Quickstep dodge with cooldown and brief invulnerability frames
 - Fog of war and a discovered-area minimap
