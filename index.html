@@ -641,6 +641,54 @@ update=function(dt){
  }
 };
 
+
+/* Loot progression and readable status effects for the free crafting loop. */
+const elementalBaseCollect=collect;
+collect=function(l){
+ if(l&&l.type==='shard'){
+  if(l.taken)return;
+  l.taken=true;game.player.craftingShards=(game.player.craftingShards||0)+1;
+  log('CRAFTING SHARD recovered!');sound(520,.12,'triangle');updateHUD();return;
+ }
+ elementalBaseCollect(l);
+};
+const elementalBaseKill=killEnemy;
+killEnemy=function(e){
+ const eligible=!!(game&&e&&game.enemies.includes(e)&&!e._shardAwarded);
+ const reward=eligible&&(e.elite||e.type==='boss');
+ if(reward)e._shardAwarded=true;
+ elementalBaseKill(e);
+ if(reward&&game&&game.player){
+  game.player.craftingShards=(game.player.craftingShards||0)+1;
+  log(e.type==='boss'?'Guardian core recovered: +1 crafting shard.':'Elite salvage recovered: +1 crafting shard.');
+  updateHUD();
+ }
+};
+const statusBaseUpdate=update;
+update=function(dt){
+ if(game&&!paused&&!dead){
+  const slowed=[];
+  for(const e of game.enemies||[]){
+   if((e.frostSlow||0)>0&&e.speed>0){slowed.push([e,e.speed]);e.speed*=.48}
+  }
+  try{statusBaseUpdate(dt)}finally{
+   for(const [e,speed] of slowed)if(game&&game.enemies.includes(e))e.speed=speed;
+  }
+ }else statusBaseUpdate(dt);
+ if(!game||paused||dead)return;
+ for(const e of [...(game.enemies||[])]){
+  if(e.venomTimer>0){
+   e.venomTimer=Math.max(0,e.venomTimer-dt);
+   e.venomTick=(e.venomTick??.65)-dt;
+   if(e.venomTick<=0&&game.enemies.includes(e)){
+    e.venomTick=.65;
+    e.hp-=Math.max(2,Math.floor(game.floor*.25)+2);
+    if(e.hp<=0)killEnemy(e);
+   }
+  }
+ }
+};
+
 })();
 </script>
 </body>
