@@ -224,7 +224,15 @@ document.getElementById('landingPlay').addEventListener('click',()=>{enterGameVi
 document.getElementById('landingContinue').addEventListener('click',()=>{enterGameView();const saved=load();if(saved)startGame(true);else showDialog('start')});
 const homeLogo=document.getElementById('homeLogo');homeLogo.addEventListener('click',showLanding);homeLogo.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();showLanding()}});
 document.addEventListener('keydown',e=>{if(e.key==='Enter'&&landing.classList.contains('active')){enterGameView();showDialog('start')}});
-try{landing.classList.toggle('active',sessionStorage.getItem('dungeonExplorerView')!=='game')}catch(_){landing.classList.add('active')}
+// A fresh visit always opens the retro landing screen. Only a true browser reload
+// restores the previously selected view, so refreshing the game never redirects home.
+let restoreGameView=false;
+try{
+  const navigation=performance.getEntriesByType('navigation')[0];
+  restoreGameView=navigation?.type==='reload'&&sessionStorage.getItem('dungeonExplorerView')==='game';
+  landing.classList.toggle('active',!restoreGameView);
+  sessionStorage.setItem('dungeonExplorerView',restoreGameView?'game':'landing');
+}catch(_){landing.classList.add('active')}
 let skillButton=document.getElementById('skillBtn');if(!skillButton){skillButton=document.createElement('button');skillButton.id='skillBtn';skillButton.textContent='✦ Skill (F)';const attackButton=document.getElementById('attackBtn');if(attackButton)attackButton.after(skillButton);}if(skillButton)skillButton.addEventListener('click',castAbility);
 
 })();
