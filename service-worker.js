@@ -1,5 +1,5 @@
 'use strict';
-const CACHE_NAME = 'dungeon-explorer-v3';
+const CACHE_NAME = 'dungeon-explorer-v4';
 const APP_SHELL = ['./', './index.html', './manifest.json', './favicon.svg'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL)).then(() => self.skipWaiting()));
@@ -10,6 +10,20 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   const request = event.request;
   if (request.method !== 'GET' || new URL(request.url).origin !== self.location.origin) return;
+
+  // Always check the network for page navigations first, so a deployment is not
+  // hidden behind an old cached index.html. Fall back to the offline shell.
+  if (request.mode === 'navigate') {
+    event.respondWith(fetch(request).then(response => {
+      if (response && response.ok) {
+        const copy = response.clone();
+        caches.open(CACHE_NAME).then(cache => cache.put('./index.html', copy));
+      }
+      return response;
+    }).catch(() => caches.match('./index.html')));
+    return;
+  }
+
   event.respondWith(caches.match(request).then(cached => {
     if (cached) return cached;
     return fetch(request).then(response => {
@@ -18,9 +32,8 @@ self.addEventListener('fetch', event => {
         caches.open(CACHE_NAME).then(cache => cache.put(request, copy));
       }
       return response;
-    }).catch(() => {
-      if (request.mode === 'navigate') return caches.match('./index.html');
-      return new Response('Offline and this resource is not cached.', {status: 503, headers: {'Content-Type':'text/plain; charset=utf-8'}});
-    });
+    }).catch(() => new Response('Offline and this resource is not cached.', {
+      status: 503, headers: {'Content-Type':'text/plain; charset=utf-8'}
+    }));
   }));
 });
