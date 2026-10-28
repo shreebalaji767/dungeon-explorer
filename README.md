@@ -29,10 +29,9 @@ Then open http://localhost:8000.
 
 ## Deploy on GitHub Pages
 
-1. Open the repository's **Settings → Pages**.
-2. Under **Build and deployment**, choose **Deploy from a branch**.
-3. Choose branch `main` and folder `/ (root)`, then save.
-4. Wait for Pages to publish. The project site URL will be shown in the Pages settings.
+The repository includes a GitHub Actions workflow at `.github/workflows/pages.yml`. It checks JavaScript syntax and deploys the static site on pushes to `main`.
+
+**One-time setup:** the connected GitHub integration cannot change the repository's Pages setting automatically. Open the repository's **Settings → Pages** and set **Build and deployment → Source** to **GitHub Actions**. Then open **Actions → Deploy Dungeon Explorer to GitHub Pages** and re-run the latest workflow (or push another commit). Once Pages is enabled, future pushes to `main` deploy automatically.
 
 The game uses relative asset and service-worker paths, so it works from a project subpath such as `https://USERNAME.github.io/dungeon-explorer/`.
 
