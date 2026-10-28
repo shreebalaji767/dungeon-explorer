@@ -40,7 +40,8 @@ The game uses relative asset and service-worker paths, so it works from a projec
 
 - **W / S**: move forward/back
 - **A / D** or **← / →**: turn
-- **Q / E**: strafe / interact with exit
+- **Q / C**: strafe left/right
+- **E**: interact with nearby exit
 - **Space**: attack
 - **H**: drink a potion
 - **I**: toggle inventory panel
