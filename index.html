@@ -110,6 +110,20 @@ details.hint summary{font-weight:900;letter-spacing:.06em;text-transform:upperca
 ::-webkit-scrollbar-thumb{background:#46506a;border:2px solid #090b12}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
 
+
+/* Compact, translucent in-game arcade buttons: stay visible while playing */
+.toolbar{position:relative;z-index:8;display:flex;flex-wrap:wrap;align-items:center;gap:4px;margin-top:-48px;padding:5px;width:fit-content;max-width:100%;background:#080b11a8;border:1px solid #68749370;box-shadow:0 0 0 1px #080b1155;backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
+.toolbar button{flex:0 1 auto;min-width:0;min-height:29px;padding:5px 8px;font-size:.65rem;line-height:1.1;letter-spacing:.035em;border:1px solid #a6b0cc77;background:#111521a8;color:#f7edc8c9;box-shadow:1px 2px 0 #05070c66;opacity:.78}
+.toolbar button:hover,.toolbar button:focus-visible{opacity:1;background:#28334bdc;border-color:#ffdc83;color:#ffedb3}
+.toolbar button:active{transform:translateY(1px);box-shadow:none}
+.mobile-controls{opacity:.88;transition:opacity .15s;background:#111521a8;border-color:#687493aa;box-shadow:3px 3px 0 #05070c88;backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
+.mobile-controls button,.dpad button,.actions-pad button{background:#20283a99;color:#f7edc8e8;border-color:#8c9aba99;box-shadow:2px 2px 0 #05070c88}
+.mobile-controls button:hover,.mobile-controls button:focus-visible,.dpad button:hover,.actions-pad button:hover{opacity:1;background:#35415acc;border-color:#ffdc83}
+.controls-title{font-size:.65rem;text-shadow:1px 1px #080b11}
+@media(max-width:760px){.toolbar{margin-top:-42px;padding:4px;gap:3px}.toolbar button{font-size:.6rem;min-height:27px;padding:4px 6px}.mobile-controls{opacity:.94}}
+@media(max-width:430px){.toolbar{width:100%;margin-top:-40px;gap:3px}.toolbar button{flex:1 1 auto;font-size:.56rem;padding:4px 5px;min-height:26px}.mobile-controls{padding:6px}.controls-title{font-size:.58rem}}
+@media(max-height:560px) and (orientation:landscape){.toolbar{margin-top:-34px}.toolbar button{min-height:24px;padding:3px 5px}.mobile-controls{opacity:.82}}
+
 </style>
 </head>
 <body>
