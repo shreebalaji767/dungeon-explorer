@@ -300,7 +300,7 @@ function castRay(angle){const p=game.player,rx=Math.cos(angle),ry=Math.sin(angle
 function render(){
 if(!game)return;
 ctx.imageSmoothingEnabled=false;ctx.setTransform(1,0,0,1,0,0);if(settings.screenShake&&damageFlash>0)ctx.translate((Math.random()-.5)*damageFlash*14,(Math.random()-.5)*damageFlash*14);
-const p=game.player,TS=16,cols=Math.ceil(W/TS)+2,rows=Math.ceil(H/TS)+2;const biome=game.floor%4===1?'crypt':game.floor%4===2?'grove':game.floor%4===3?'frost':'ember';const palette={crypt:['#302b32','#4b4147','#211d27','#62525a','#55505a','#625a61','#354533'],grove:['#273a30','#3b5943','#1c2c24','#547454','#465947','#627b57','#354533'],frost:['#2a3c50','#46637b','#1d2a3b','#7193a8','#4c6476','#6c879b','#384e61'],ember:['#4a2b2b','#70413a','#311e25','#a85b43','#61413c','#855346','#472e32']}[biome];
+const p=game.player,TS=16,cols=Math.ceil(W/TS)+2,rows=Math.ceil(H/TS)+2;const themes=[{id:'crypt',name:'SUNDERED CRYPT',colors:['#302b32','#4b4147','#211d27','#62525a','#55505a','#625a61','#354533']},{id:'grove',name:'OVERGROWN WILDS',colors:['#273a30','#3b5943','#1c2c24','#547454','#465947','#627b57','#354533']},{id:'frost',name:'FROSTBOUND HALLS',colors:['#2a3c50','#46637b','#1d2a3b','#7193a8','#4c6476','#6c879b','#384e61']},{id:'ember',name:'EMBER FORGE',colors:['#4a2b2b','#70413a','#311e25','#a85b43','#61413c','#855346','#472e32']},{id:'fungal',name:'MYCELIUM DEPTHS',colors:['#302b3d','#51435d','#201c2d','#a078b4','#51485f','#76608a','#384533']},{id:'crystal',name:'CRYSTAL ABYSS',colors:['#253746','#3c6174','#172a38','#73c9d4','#3b5665','#4b8190','#304753']}];const theme=themes[(Math.max(1,game.floor)-1)%themes.length],biome=theme.id,palette=theme.colors;
 const camX=p.x-W/(2*TS),camY=p.y-H/(2*TS),ox=-(camX-Math.floor(camX))*TS,oy=-(camY-Math.floor(camY))*TS;
 const sx=x=>(x-camX)*TS,sy=y=>(y-camY)*TS;
 ctx.fillStyle='#11131b';ctx.fillRect(0,0,W,H);
@@ -320,7 +320,7 @@ for(let syi=0;syi<rows;syi++)for(let sxi=0;sxi<cols;sxi++){
   ctx.fillStyle=seed%4===0?palette[4]:seed%4===1?palette[5]:palette[4];ctx.fillRect(px,py,TS,TS);
   ctx.fillStyle=palette[5];if(seed%3===0)ctx.fillRect(px+3,py+4,4,1);
   if(seed%5===0){ctx.fillStyle='#454653';ctx.fillRect(px+10,py+10,2,2)}
-  ctx.fillStyle=palette[6];ctx.fillRect(px,py+TS-1,TS,1);ctx.fillRect(px+TS-1,py,1,TS);
+  ctx.fillStyle=palette[6];ctx.fillRect(px,py+TS-1,TS,1);ctx.fillRect(px+TS-1,py,1,TS);if(biome==='fungal'&&seed%7===0){ctx.fillStyle='#a078b455';ctx.fillRect(px+4,py+5,2,5);ctx.fillRect(px+2,py+4,6,2)}else if(biome==='crystal'&&seed%6===0){ctx.fillStyle='#73c9d455';ctx.fillRect(px+3,py+3,1,8);ctx.fillRect(px+3,py+3,5,1)}else if(biome==='ember'&&seed%8===0){ctx.fillStyle='#d96b5744';ctx.fillRect(px+3,py+9,8,1);ctx.fillRect(px+8,py+5,1,5)}
  }
 }
 const drawSprite=(x,y,type,entity)=>{const px=Math.round(sx(x)),py=Math.round(sy(y));if(px<-20||py<-20||px>W+20||py>H+20)return;
@@ -344,7 +344,7 @@ ctx.fillStyle='#f3e0a2';ctx.fillRect(px+Math.round(Math.cos(p.a)*6)-1,py+Math.ro
 // Short weapon arc when attacking.
 if(attackFlash>0){ctx.strokeStyle='#ffe39a';ctx.lineWidth=3;ctx.beginPath();ctx.arc(px+Math.cos(p.a)*7,py+Math.sin(p.a)*7,8,p.a-.9,p.a+.9);ctx.stroke()}
 if(damageFlash>0){ctx.fillStyle='rgba(220,40,60,'+(damageFlash*1.1)+')';ctx.fillRect(0,0,W,H)}
-ctx.fillStyle='#f0d99d';ctx.font='bold 10px monospace';ctx.fillText('FLOOR '+game.floor, W-70,12);
+ctx.fillStyle='#f0d99d';ctx.font='bold 10px monospace';ctx.fillText('F'+game.floor+' · '+theme.name, Math.max(6,W-ctx.measureText('F'+game.floor+' · '+theme.name).width-6),12);
 if(game.enemies.some(e=>e.type==='boss')){ctx.fillStyle='#ff9ca4';ctx.fillText('GUARDIAN NEARBY',6,12)}
 if(mapVisible){ctx.fillStyle='#11131b';ctx.fillRect(W-105,18,98,98);ctx.drawImage(mini,W-101,22,90,90)}
 }
