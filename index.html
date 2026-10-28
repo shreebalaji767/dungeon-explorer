@@ -469,9 +469,9 @@ function whirlwindAttack(){
 }
 function throwBomb(){
  if(!game||paused||dead)return;const p=game.player;
- if((p.craftingShards||0)>0)p.craftingShards--;else if(p.gold>=15)p.gold-=15;else{log('Bomb needs 1 crafting shard or 15 gold.');return}
+ const paidWithShard=(p.craftingShards||0)>0;if(paidWithShard)p.craftingShards--;else if(p.gold>=15)p.gold-=15;else{log('Bomb needs 1 crafting shard or 15 gold.');return}
  const target=game.enemies.filter(e=>e.hp>0&&lineOfSight(p.x,p.y,e.x,e.y)&&dist(p,e)<7).sort((a,b)=>dist(p,a)-dist(p,b))[0];
- if(!target){if((p.craftingShards||0)>=0){if(p.craftingShards!==undefined&&p.craftingShards>=0&&p._bombRefund){p.craftingShards++;p._bombRefund=false}else{p.gold+=15}}log('No target in bomb range.');return}
+ if(!target){if(paidWithShard)p.craftingShards++;else p.gold+=15;log('No target in bomb range. Resources refunded.');return}
  const x=target.x,y=target.y;let hits=0;for(const e of [...game.enemies])if(e.hp>0&&Math.hypot(e.x-x,e.y-y)<2.15){const dmg=Math.max(1,Math.floor((p.damage+(p.weaponBonus||0))*1.25));e.hp-=dmg;e.stun=Math.max(e.stun||0,1.1);hits++;log('Bomb blasts '+e.type+' for '+dmg+'.');if(e.hp<=0)killEnemy(e)}
  sound(90,.25,'square');log('Bomb detonated. '+hits+' enemy target(s) caught in the blast.');updateHUD();
 }
