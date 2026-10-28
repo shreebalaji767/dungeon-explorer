@@ -172,6 +172,19 @@ details.hint summary{font-weight:900;letter-spacing:.06em;text-transform:upperca
 @media(max-width:380px){.stage>.toolbar button{min-height:20px;padding:2px 0;font-size:7px;letter-spacing:-.065em}}
 @media(orientation:landscape) and (max-height:520px){.stage>.toolbar{gap:2px;padding:2px}.stage>.toolbar button{min-height:20px;padding:2px 1px;font-size:8px}}
 
+
+/* Town, NPC and quest-board expansion */
+.town-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:12px 0}
+.town-npc{border:2px solid #46506a;background:#0d111c;padding:10px;min-width:0}
+.town-npc h3{margin:0 0 7px;color:#ffdc83;font-size:.82rem}
+.town-npc p{font-size:.74rem;margin:0 0 9px;line-height:1.5}
+.quest-card{border:1px solid #46506a;background:#0b0f19;padding:10px;margin:7px 0}
+.quest-card small{display:block;color:#a6b0cc;margin-top:4px;line-height:1.45}
+.quest-progress{height:7px;background:#252d40;margin-top:8px;border:1px solid #46506a}
+.quest-progress span{display:block;height:100%;background:#8fe6a3}
+.town-chip{display:inline-block;border:1px solid #8fe6a3;color:#8fe6a3;padding:3px 6px;font-size:.65rem;margin:2px}
+@media(max-width:430px){.town-grid{grid-template-columns:1fr}.town-npc{padding:8px}}
+
 </style>
 </head>
 <body>
@@ -383,6 +396,40 @@ try{
   sessionStorage.setItem('dungeonExplorerView',restoreGameView?'game':'landing');
 }catch(_){landing.classList.add('active')}
 let skillButton=document.getElementById('skillBtn');if(!skillButton){skillButton=document.createElement('button');skillButton.id='skillBtn';skillButton.textContent='✦ Skill (F)';const attackButton=document.getElementById('attackBtn');if(attackButton)attackButton.after(skillButton);}if(skillButton)skillButton.addEventListener('click',castAbility);
+
+
+/* Town & quest expansion: local-only NPCs, repeatable contracts, persistent rewards. */
+const townBaseShowDialog=showDialog;
+let townResumeExpedition=false;
+const TOWN_QUESTS=[
+ {id:'slayer',name:'Ratcatcher’s Contract',npc:'Mira the Scout',desc:'Defeat 8 enemies in any expedition.',kind:'kills',goal:8,reward:5},
+ {id:'treasure',name:'Lost Supply Cache',npc:'Pip the Quartermaster',desc:'Collect 60 gold from dungeon loot.',kind:'gold',goal:60,reward:4},
+ {id:'guardian',name:'Guardian Bounty',npc:'Captain Rowan',desc:'Defeat a floor guardian.',kind:'bosses',goal:1,reward:7},
+ {id:'explorer',name:'Map the Deep',npc:'Archivist Nera',desc:'Descend to 3 different floors in one run.',kind:'floors',goal:3,reward:5}
+];
+function townState(){metaData.town=metaData.town||{progress:{},claimed:[],seen:[]};metaData.town.progress=metaData.town.progress||{};metaData.town.claimed=metaData.town.claimed||[];metaData.town.seen=metaData.town.seen||[];return metaData.town}
+function townQuestProgress(kind,amount){const t=townState();for(const q of TOWN_QUESTS){if(t.claimed.includes(q.id))continue;if(q.kind===kind)t.progress[q.id]=Math.min(q.goal,(t.progress[q.id]||0)+amount)}saveMeta()}
+function openTown(){townResumeExpedition=!!(game&&!dead);if(townResumeExpedition){paused=true;running=false}showDialog('town')}
+function renderTown(){
+ const d=$('dialog'),t=townState();
+ const npc=[['Mira the Scout','🗡','“The tunnels are crawling again. Bring me proof you can handle them.”','slayer'],['Pip the Quartermaster','▣','“Coins are no good buried in a crypt. Bring them back alive.”','treasure'],['Captain Rowan','♜','“A guardian’s head is worth more than a sack of goblin teeth.”','guardian'],['Archivist Nera','✦','“Every floor hides a story. Map the deep and return to me.”','explorer']];
+ d.innerHTML='<div class="eyebrow">Safe haven · local progress only</div><h1>WAYFARER’S REST</h1><p>The lamps are lit and the forge is warm. Take a contract before your next descent. All rewards are earned in-game; no purchases or network services.</p><div class="town-grid">'+npc.map(n=>{const q=TOWN_QUESTS.find(x=>x.id===n[3]),v=Math.min(q.goal,t.progress[q.id]||0),done=v>=q.goal,claimed=t.claimed.includes(q.id);return '<section class="town-npc"><h3>'+n[1]+' '+n[0]+'</h3><p>'+n[2]+'</p><b>'+q.name+'</b><small>'+q.desc+'</small><div class="quest-progress"><span style="width:'+(100*v/q.goal)+'%"></span></div><p class="muted">'+v+' / '+q.goal+' · '+q.reward+' Legacy points</p><button data-town-quest="'+q.id+'" '+(!done||claimed?'disabled':'')+'>'+(claimed?'Reward claimed':done?'Claim reward':'Contract active')+'</button></section>'}).join('')+'</div><div class="actions"><button id="townRest">Rest & restore (25 gold)</button><button id="townForge">Visit forge</button><button class="primary" id="townReturn">Return to adventure</button></div><p class="hint">Contracts are stored on this device and survive refreshes. Guardian and floor progress counts only during an active run.</p>';
+ $('overlay').classList.remove('hidden');
+ d.querySelectorAll('[data-town-quest]').forEach(b=>b.onclick=()=>{const q=TOWN_QUESTS.find(x=>x.id===b.dataset.townQuest),state=townState();if(!q||state.claimed.includes(q.id)||(state.progress[q.id]||0)<q.goal)return;state.claimed.push(q.id);metaData.legacy=(metaData.legacy||0)+q.reward;saveMeta();log('Contract complete: '+q.name+'. +'+q.reward+' Legacy points.');renderTown()});
+ $('townRest').onclick=()=>{if(!game||dead){alert('Start an expedition before resting.');return}if(game.player.gold<25){log('Rest costs 25 gold.');return}game.player.gold-=25;game.player.hp=game.player.maxHp;game.player.stamina=100;save();updateHUD();log('Rested at Wayfarer’s Rest. Health and stamina restored.');renderTown()};
+ $('townForge').onclick=()=>showDialog('shop');
+ $('townReturn').onclick=()=>{if(townResumeExpedition&&game&&!dead){paused=false;running=true;$('overlay').classList.add('hidden');last=performance.now();updateHUD();requestAnimationFrame(loop)}else showDialog('start')};
+}
+const townWrappedShowDialog=showDialog;
+showDialog=function(kind){townWrappedShowDialog(kind);if(kind==='town')renderTown();if(kind==='start'){const anchor=$('legacyBtn');if(anchor&&!$('townBtnMenu')){const b=document.createElement('button');b.id='townBtnMenu';b.textContent='Wayfarer’s Rest · Quests';anchor.after(b);b.onclick=openTown}}};
+const townBaseKill=killEnemy;
+killEnemy=function(e){const wasBoss=!!(e&&e.type==='boss');const valid=!!(game&&e&&game.enemies.includes(e)&&!e._countedKill);townBaseKill(e);if(valid){townQuestProgress('kills',1);if(wasBoss)townQuestProgress('bosses',1)}};
+const townBaseCollect=collect;
+collect=function(l){const before=game&&game.player?game.player.gold:0;townBaseCollect(l);if(l&&l.type==='gold'&&game&&game.player)townQuestProgress('gold',Math.max(0,game.player.gold-before))};
+const townBaseInteract=interact;
+interact=function(){const before=game&&game.floor;townBaseInteract();if(game&&before!==undefined&&game.floor>before)townQuestProgress('floors',1)};
+const townToolbar=document.querySelector('.stage>.toolbar');
+if(townToolbar&&!document.getElementById('townBtnGame')){const b=document.createElement('button');b.id='townBtnGame';b.textContent='Town & Quests';b.addEventListener('click',openTown);townToolbar.appendChild(b)}
 
 })();
 </script>
