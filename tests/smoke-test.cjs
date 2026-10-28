@@ -48,6 +48,10 @@ assert.ok(manifest.start_url && manifest.scope, 'PWA manifest has start URL and 
 assert.ok(js.includes('function openCraftingBench('), 'free weapon crafting menu exists');
 assert.ok(js.includes('function installDungeonExpansion('), 'procedural floors install new dungeon features');
 assert.ok(js.includes('weaponElement'), 'elemental weapon enchantments are supported');
+assert.ok(js.includes('function applyWeaponElementToHits('), 'elemental enchantments affect successful weapon hits');
+assert.ok(js.includes("e.venomTimer=Math.max(e.venomTimer||0,3)"), 'venom enchantment applies damage over time');
+assert.ok(js.includes("e.stun=Math.max(e.stun||0,.8)"), 'frost enchantment briefly freezes enemies');
+assert.ok(js.includes("Trap safely disarmed. No damage taken."), 'interacting with a trap disarms it safely');
 assert.ok(js.includes('function breakBarrel('), 'destructible barrels can drop loot');
 assert.ok(js.includes('SECRET PASSAGE FOUND!'), 'hidden passages reveal bonus treasure');
 assert.ok(js.includes('Spike trap!'), 'floor traps damage the player');
