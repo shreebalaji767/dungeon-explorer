@@ -565,7 +565,7 @@ interact=function(){
  const near=(o)=>Math.hypot(p.x-(o.x+.5),p.y-(o.y+.5))<1.25;
  const barrel=game.barrels?.find(b=>!b.opened&&near(b));if(barrel){breakBarrel(barrel);return}
  const secret=game.secrets?.find(s=>!s.opened&&near(s));if(secret){secret.opened=true;game.grid[secret.y][secret.x]=0;game.loot.push({x:secret.x,y:secret.y,type:'cache',taken:false});log('SECRET PASSAGE FOUND! A hidden wall slides away and reveals a treasure cache.');sound(320,.25,'triangle');updateHUD();return}
- const trap=game.trapTiles?.find(t=>t.armed&&near(t));if(trap){trap.armed=false;trap.cooldown=1;const dmg=Math.max(3,Math.floor((game.floor+2)*1.8-p.defense*.3));p.hp=Math.max(1,p.hp-dmg);p.invulnerable=Math.max(p.invulnerable||0,.7);log('You disarm a floor trap after triggering it. -'+dmg+' HP.');sound(80,.2,'square');updateHUD();return}
+ const trap=game.trapTiles?.find(t=>t.armed&&near(t));if(trap){trap.armed=false;trap.cooldown=0;log('Trap safely disarmed. No damage taken.');sound(260,.12,'triangle');updateHUD();return}
  if(p.craftingShards>0&&game.switches?.some(v=>!v.used&&near(v))){expansionBaseInteract();return}
  expansionBaseInteract();
 };
@@ -594,6 +594,52 @@ function installExpansionButtons(){
 installExpansionButtons();
 const expansionBaseHUD=updateHUD;
 updateHUD=function(){expansionBaseHUD();if(!game)return;const b=$('craftingBtn');if(b)b.textContent='⚒ Craft (C) · '+(game.player.craftingShards||0)+' shards'};
+
+
+/* Elemental enchantments are wired into every weapon attack, not just the crafting menu. */
+function applyWeaponElementToHits(before){
+ if(!game||!game.player)return;
+ const p=game.player,element=p.weaponElement;
+ if(!element||element==='none')return;
+ let applied=0;
+ for(const e of game.enemies||[]){
+  if(e.hp<=0||!before.has(e)||e.hp>=before.get(e))continue;
+  if(element==='fire'){e.burn=Math.max(e.burn||0,2.5);e.burnTick=e.burnTick||.5}
+  else if(element==='frost'){e.stun=Math.max(e.stun||0,.8);e.frostSlow=Math.max(e.frostSlow||0,2.5)}
+  else if(element==='venom'){e.venomTimer=Math.max(e.venomTimer||0,3);e.venomTick=e.venomTick||.65}
+  applied++;
+ }
+ if(applied)log(element.toUpperCase()+' enchantment activates.');
+}
+function wrapElementalAttack(fn){
+ return function(...args){
+  if(!game||!game.player)return fn.apply(this,args);
+  const before=new Map((game.enemies||[]).map(e=>[e,e.hp]));
+  const result=fn.apply(this,args);
+  applyWeaponElementToHits(before);
+  return result;
+ };
+}
+attack=wrapElementalAttack(attack);
+heavyAttack=wrapElementalAttack(heavyAttack);
+whirlwindAttack=wrapElementalAttack(whirlwindAttack);
+const elementalBaseUpdate=update;
+update=function(dt){
+ elementalBaseUpdate(dt);
+ if(!game||paused||dead)return;
+ for(const e of [...(game.enemies||[])]){
+  if(e.frostSlow>0)e.frostSlow=Math.max(0,e.frostSlow-dt);
+  if(e.venomTimer>0){
+   e.venomTimer=Math.max(0,e.venomTimer-dt);
+   e.venomTick=(e.venomTick??.65)-dt;
+   if(e.venomTick<=0&&game.enemies.includes(e)){
+    e.venomTick=.65;
+    e.hp-=Math.max(2,Math.floor(game.floor*.25)+2);
+    if(e.hp<=0)killEnemy(e);
+   }
+  }
+ }
+};
 
 })();
 </script>
