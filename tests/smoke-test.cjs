@@ -24,6 +24,10 @@ assert.ok(sw.includes("const CACHE_NAME = 'dungeon-explorer-v5'"), 'cache versio
 assert.ok(js.includes("beforeinstallprompt"), 'PWA install prompt is handled');
 assert.ok(js.includes("appinstalled"), 'installed state is handled');
 assert.ok(html.includes('@media(max-width:430px)'), 'small-phone layout rules exist');
+assert.ok(html.includes('/* FULL-SITE 16-BIT ARCADE RESTYLE */'), 'full-site retro theme exists');
+assert.ok(html.includes('image-rendering:pixelated'), 'pixel-art rendering is enabled');
+assert.ok(html.includes('repeating-linear-gradient(0deg,#111521 0 7px,#131827 7px 8px)'), 'retro panel texture exists');
+assert.equal(manifest.theme_color, '#090b12', 'PWA theme matches retro palette');
 assert.ok(html.includes('@media(max-height:560px) and (orientation:landscape)'), 'short landscape layout rules exist');
 assert.ok(sw.indexOf('if (request.mode === \'navigate\')') < sw.indexOf('caches.match(request).then(cached'), 'navigation checks network before cache');
 assert.equal(manifest.name, 'Dungeon Explorer');
