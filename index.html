@@ -507,6 +507,94 @@ interact=function(){
  combatBaseInteract();
 };
 
+
+/* Free dungeon expansion: crafting, elemental enchantments, barrels, secrets and traps. */
+function installDungeonExpansion(floorState){
+ const g=floorState;if(!g||g.expansionInstalled)return g;g.expansionInstalled=true;
+ g.barrels=[];g.secrets=[];g.trapTiles=[];
+ const occupied=(x,y)=>Math.hypot(x-g.player.x,y-g.player.y)<4||g.enemies.some(e=>Math.hypot(x+.5-e.x,y+.5-e.y)<1.3)||g.loot.some(l=>!l.taken&&Math.hypot(x-l.x,y-l.y)<1.1);
+ const candidates=[];
+ for(let y=2;y<g.grid.length-2;y++)for(let x=2;x<g.grid[y].length-2;x++){
+  if(g.grid[y][x]!==0||occupied(x,y))continue;
+  let walls=0;for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]])if(g.grid[y+dy]?.[x+dx]!==0)walls++;
+  if(walls<=1)candidates.push({x,y});
+ }
+ for(let i=candidates.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[candidates[i],candidates[j]]=[candidates[j],candidates[i]]}
+ for(const c of candidates.slice(0,Math.min(4,Math.floor(g.floor/2)+2)))g.barrels.push({...c,hp:2,opened:false});
+ for(const c of candidates.slice(5,Math.min(7,Math.floor(g.floor/3)+6)))g.trapTiles.push({...c,cooldown:0,armed:true});
+ // A secret wall is placed next to a walkable tile and opened with the interact key.
+ const walls=[];for(let y=2;y<g.grid.length-2;y++)for(let x=2;x<g.grid[y].length-2;x++){
+  if(g.grid[y][x]===0)continue;
+  const adjacent=[[1,0],[-1,0],[0,1],[0,-1]].filter(([dx,dy])=>g.grid[y+dy]?.[x+dx]===0);
+  if(adjacent.length===1&&Math.hypot(x-g.player.x,y-g.player.y)>5)walls.push({x,y,dx:adjacent[0][0],dy:adjacent[0][1],opened:false});
+ }
+ if(walls.length){const s=walls[Math.floor(Math.random()*walls.length)];g.secrets.push(s)}
+ return g;
+}
+const expansionBaseGenerateFloor=generateFloor;
+generateFloor=function(...args){return installDungeonExpansion(expansionBaseGenerateFloor(...args))};
+if(game)installDungeonExpansion(game);
+function openCraftingBench(){
+ if(!game){showDialog('start');return}const p=game.player;paused=true;running=false;
+ const element=p.weaponElement||'none';
+ $('dialog').innerHTML='<div class="eyebrow">Wayfarer forge · no premium currency</div><h1>CRAFT & ENCHANT</h1><p>Use dungeon loot to improve the weapon you already own. Enchantments are free to change later, and all progress stays in your local save.</p><div class="inventory"><div class="item"><span>Weapon temper<small>+2 permanent weapon damage</small></span><button id="temperWeapon" '+((p.craftingShards||0)<2?'disabled':'')+'>2 shards</button></div><div class="item"><span>Elemental enchantment<small>Fire, frost, or venom · current: '+element+'</small></span><button id="enchantWeapon" '+((p.craftingShards||0)<1?'disabled':'')+'>1 shard</button></div><div class="item"><span>Field repair<small>Restore up to 35 HP</small></span><button id="fieldRepair" '+(p.gold<12||p.hp>=p.maxHp?'disabled':'')+'>12 gold</button></div></div><p class="combat-tip">Shards come from treasure caches and rune switches. No real-money purchases or external services.</p><div class="actions"><button class="primary" id="craftClose">Return to game</button></div>';
+ $('overlay').classList.remove('hidden');
+ $('temperWeapon').onclick=()=>{if((p.craftingShards||0)<2)return;p.craftingShards-=2;p.weaponBonus=(p.weaponBonus||0)+2;log('Weapon tempered: +2 damage.');openCraftingBench()};
+ $('enchantWeapon').onclick=()=>{if((p.craftingShards||0)<1)return;p.craftingShards--;const els=['fire','frost','venom'];p.weaponElement=els[(els.indexOf(p.weaponElement)+1+els.length)%els.length];log('Weapon enchanted with '+p.weaponElement+'.');openCraftingBench()};
+ $('fieldRepair').onclick=()=>{if(p.gold<12||p.hp>=p.maxHp)return;p.gold-=12;const n=Math.min(35,p.maxHp-p.hp);p.hp+=n;log('Field repair restores '+n+' HP.');openCraftingBench()};
+ $('craftClose').onclick=()=>{paused=false;running=true;$('overlay').classList.add('hidden');last=performance.now();updateHUD();requestAnimationFrame(loop)};
+}
+function breakBarrel(b){
+ if(!game||b.opened)return;b.opened=true;b.hp=0;const roll=Math.random();
+ if(roll<.32)game.loot.push({x:b.x,y:b.y,type:'gold',taken:false});
+ else if(roll<.48)game.loot.push({x:b.x,y:b.y,type:'potion',taken:false});
+ else if(roll<.68)game.loot.push({x:b.x,y:b.y,type:'cache',taken:false});
+ else if(roll<.82)game.loot.push({x:b.x,y:b.y,type:'gold',taken:false});
+ log('Barrel smashed! '+(game.loot.some(l=>!l.taken&&Math.abs(l.x-b.x)<.01&&Math.abs(l.y-b.y)<.01)?'Loot spilled onto the floor.':'The barrel was empty.'));sound(100,.12,'square');updateHUD();
+}
+const expansionBaseAttack=attack;
+attack=function(){
+ if(!game||paused||dead)return;const p=game.player;
+ const barrel=game.barrels?.filter(b=>!b.opened&&Math.hypot(p.x-(b.x+.5),p.y-(b.y+.5))<1.55&&Math.abs(norm(Math.atan2(b.y+.5-p.y,b.x+.5-p.x)-p.a))<1.1).sort((a,b)=>Math.hypot(p.x-a.x,p.y-a.y)-Math.hypot(p.x-b.x,p.y-b.y))[0];
+ if(barrel){barrel.hp--;log('You strike a breakable barrel.');if(barrel.hp<=0)breakBarrel(barrel);return}
+ expansionBaseAttack();
+};
+const expansionBaseInteract=interact;
+interact=function(){
+ if(!game||paused||dead)return;const p=game.player;
+ const near=(o)=>Math.hypot(p.x-(o.x+.5),p.y-(o.y+.5))<1.25;
+ const barrel=game.barrels?.find(b=>!b.opened&&near(b));if(barrel){breakBarrel(barrel);return}
+ const secret=game.secrets?.find(s=>!s.opened&&near(s));if(secret){secret.opened=true;game.grid[secret.y][secret.x]=0;game.loot.push({x:secret.x,y:secret.y,type:'cache',taken:false});log('SECRET PASSAGE FOUND! A hidden wall slides away and reveals a treasure cache.');sound(320,.25,'triangle');updateHUD();return}
+ const trap=game.trapTiles?.find(t=>t.armed&&near(t));if(trap){trap.armed=false;trap.cooldown=1;const dmg=Math.max(3,Math.floor((game.floor+2)*1.8-p.defense*.3));p.hp=Math.max(1,p.hp-dmg);p.invulnerable=Math.max(p.invulnerable||0,.7);log('You disarm a floor trap after triggering it. -'+dmg+' HP.');sound(80,.2,'square');updateHUD();return}
+ if(p.craftingShards>0&&game.switches?.some(v=>!v.used&&near(v))){expansionBaseInteract();return}
+ expansionBaseInteract();
+};
+const expansionBaseUpdate=update;
+update=function(dt){
+ if(game&&!paused&&!dead){
+  const p=game.player;
+  for(const t of game.trapTiles||[]){t.cooldown=Math.max(0,(t.cooldown||0)-dt);if(t.armed&&t.cooldown<=0&&Math.hypot(p.x-(t.x+.5),p.y-(t.y+.5))<.42){const dmg=Math.max(2,Math.floor((game.floor+1)*1.2-p.defense*.2));p.hp=Math.max(1,p.hp-dmg);p.invulnerable=Math.max(p.invulnerable||0,.55);t.cooldown=1.6;log('Spike trap! -'+dmg+' HP. Use INTERACT nearby to disarm it.');sound(75,.15,'square');updateHUD()}}
+ }
+ expansionBaseUpdate(dt);
+};
+const expansionBaseRender=render;
+render=function(){
+ expansionBaseRender();if(!game)return;
+ const p=game.player,TS=16,camX=p.x-W/(2*TS),camY=p.y-H/(2*TS),sx=x=>(x-camX)*TS,sy=y=>(y-camY)*TS;
+ for(const b of game.barrels||[]){if(b.opened)continue;const x=sx(b.x),y=sy(b.y);if(x<-TS||y<-TS||x>W+TS||y>H+TS)continue;ctx.fillStyle='#754322';ctx.fillRect(x+3,y+3,10,11);ctx.fillStyle='#c58b45';ctx.fillRect(x+3,y+4,10,2);ctx.fillRect(x+3,y+10,10,2);ctx.fillStyle='#3b251b';ctx.fillRect(x+7,y+3,2,11)}
+ for(const t of game.trapTiles||[]){const x=sx(t.x),y=sy(t.y);if(x<-TS||y<-TS||x>W+TS||y>H+TS)continue;ctx.fillStyle=t.armed?'#b54c50':'#46624d';ctx.fillRect(x+4,y+4,8,8);ctx.fillStyle='#e6c3a2';ctx.fillRect(x+6,y+5,4,6)}
+ for(const s of game.secrets||[]){if(s.opened)continue;const x=sx(s.x),y=sy(s.y);if(x<-TS||y<-TS||x>W+TS||y>H+TS)continue;ctx.fillStyle='#d7b86c';ctx.fillRect(x+5,y+5,6,6)}
+};
+document.addEventListener('keydown',e=>{if(e.repeat||e.target?.matches?.('input,textarea,select'))return;if(e.code==='KeyC')openCraftingBench()});
+function installExpansionButtons(){
+ const pad=document.querySelector('.actions-pad');if(!pad||document.getElementById('craftingBtn'))return;
+ const b=document.createElement('button');b.id='craftingBtn';b.textContent='⚒ Craft (C)';b.title='Weapon crafting and elemental enchantments';b.onclick=openCraftingBench;pad.appendChild(b);
+ const tip=document.createElement('div');tip.className='combat-tip';tip.textContent='Explore: barrels hide loot · gold glint marks secret walls · red spikes are traps. Attack barrels or press Interact nearby.';pad.appendChild(tip);
+}
+installExpansionButtons();
+const expansionBaseHUD=updateHUD;
+updateHUD=function(){expansionBaseHUD();if(!game)return;const b=$('craftingBtn');if(b)b.textContent='⚒ Craft (C) · '+(game.player.craftingShards||0)+' shards'};
+
 })();
 </script>
 </body>
