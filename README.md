@@ -6,11 +6,13 @@ A free, single-player top-down pixel-art roguelite built with vanilla JavaScript
 
 - Procedurally generated dungeons with connected rooms, corridors, loot, traps, and exit stairs
 - Four rotating visual biomes: crypt, overgrown ruins, frost vault, and ember pit
-- Real-time melee combat, critical hits, enemy pursuit, line-of-sight checks, and boss enrage phases
+- Real-time melee combat, critical hits, enemy pursuit, line-of-sight checks, and a two-phase guardian encounter
 - Guardians every fourth floor, with stronger enemies on Hardcore difficulty
 - Story, Normal, and Hardcore difficulty options
 - Shared daily challenge with a deterministic seed for the UTC date
-- One-use healing shrines, healing potions, equipment drops, gold, leveling, and persistent character progression between floors
+- One-use healing shrines, healing potions, equipment drops, gold bounties for clearing floors, and progression between floors
+- Level-up talent choices: Heavy Hand, Iron Heart, Quickstep, and Fortune
+- Rare relics with passive bonuses, secret caches, and lifetime records
 - Quickstep dodge with cooldown and brief invulnerability frames
 - Fog of war and a discovered-area minimap
 - Permadeath for the active expedition; lifetime run and kill records remain on the device
