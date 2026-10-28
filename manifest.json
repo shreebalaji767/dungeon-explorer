@@ -1,0 +1,19 @@
+{
+  "name": "Dungeon Explorer",
+  "short_name": "Dungeon",
+  "description": "A free, offline-ready retro dungeon crawler.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#10100f",
+  "theme_color": "#10100f",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "./favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
