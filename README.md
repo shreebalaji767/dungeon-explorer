@@ -6,7 +6,11 @@ A self-contained, static browser dungeon crawler built with vanilla JavaScript, 
 
 - Pseudo-3D first-person raycasting renderer with wall shading and billboard enemies/items
 - Procedurally generated dungeon floors with rooms, corridors, loot, and exit stairs
-- Real-time movement, enemy pursuit, line-of-sight checks, melee attacks, and damage feedback
+- Real-time movement, enemy pursuit, line-of-sight checks, melee attacks, critical hits, and damage feedback
+- Quickstep dodge with cooldown and brief invulnerability frames
+- Procedural spike traps that punish careless movement and can be evaded with a well-timed dodge
+- Boss enrage phase below 40% health, with faster movement and stronger attacks
+- Enemies can land close-range attacks (combat spacing and dodge timing matter)
 - Multiple enemy types and a guardian boss every fourth floor
 - Experience, leveling, equipment bonuses, gold, and healing potions
 - Permadeath: dying deletes the active expedition; lifetime run and kill records remain locally
@@ -41,7 +45,8 @@ The game uses relative asset and service-worker paths, so it works from a projec
 - **A / D** or **← / →**: turn
 - **Q / C**: strafe left/right
 - **E**: interact with nearby exit
-- **Space**: attack
+- **Space**: attack (16% chance of double-damage critical hit)
+- **Shift**: quickstep dodge (2.4-second cooldown)
 - **H**: drink a potion
 - **I**: toggle inventory panel
 - **M**: toggle map overlay
