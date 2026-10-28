@@ -45,4 +45,12 @@ assert.ok(js.includes("if(e.code==='KeyG')throwBomb()"), 'bomb keyboard control 
 assert.ok(js.includes('combatBaseInteract();'), 'expanded interactions preserve original dungeon interactions');
 assert.equal(manifest.name, 'Dungeon Explorer');
 assert.ok(manifest.start_url && manifest.scope, 'PWA manifest has start URL and scope');
+assert.ok(js.includes('function openCraftingBench('), 'free weapon crafting menu exists');
+assert.ok(js.includes('function installDungeonExpansion('), 'procedural floors install new dungeon features');
+assert.ok(js.includes('weaponElement'), 'elemental weapon enchantments are supported');
+assert.ok(js.includes('function breakBarrel('), 'destructible barrels can drop loot');
+assert.ok(js.includes('SECRET PASSAGE FOUND!'), 'hidden passages reveal bonus treasure');
+assert.ok(js.includes('Spike trap!'), 'floor traps damage the player');
+assert.ok(js.includes("if(e.code==='KeyC')openCraftingBench()"), 'crafting has a keyboard shortcut');
+assert.ok(sw.includes('dungeon-explorer-v9'), 'offline cache is bumped for the expansion');
 console.log('Dungeon Explorer smoke tests passed.');
