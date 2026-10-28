@@ -646,8 +646,7 @@ update=function(dt){
 const elementalBaseCollect=collect;
 collect=function(l){
  if(l&&l.type==='shard'){
-  if(l.taken)return;
-  l.taken=true;game.player.craftingShards=(game.player.craftingShards||0)+1;
+  game.player.craftingShards=(game.player.craftingShards||0)+1;
   log('CRAFTING SHARD recovered!');sound(520,.12,'triangle');updateHUD();return;
  }
  elementalBaseCollect(l);
@@ -675,18 +674,6 @@ update=function(dt){
    for(const [e,speed] of slowed)if(game&&game.enemies.includes(e))e.speed=speed;
   }
  }else statusBaseUpdate(dt);
- if(!game||paused||dead)return;
- for(const e of [...(game.enemies||[])]){
-  if(e.venomTimer>0){
-   e.venomTimer=Math.max(0,e.venomTimer-dt);
-   e.venomTick=(e.venomTick??.65)-dt;
-   if(e.venomTick<=0&&game.enemies.includes(e)){
-    e.venomTick=.65;
-    e.hp-=Math.max(2,Math.floor(game.floor*.25)+2);
-    if(e.hp<=0)killEnemy(e);
-   }
-  }
- }
 };
 
 })();
