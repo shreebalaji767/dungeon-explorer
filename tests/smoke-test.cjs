@@ -20,7 +20,7 @@ assert.ok(!js.includes('baseKillEnemy=baseKillEnemy'), 'no accidental const self
 assert.ok(js.includes('p.stamina=Math.min(100'), 'stamina regenerates over time');
 assert.ok(js.includes('if(!save())return'), 'failed saves do not exit and lose progress');
 assert.ok(js.includes("navigation?.type==='reload'"), 'landing navigation preserves refresh behavior');
-assert.ok(sw.includes("const CACHE_NAME = 'dungeon-explorer-v9'"), 'cache version is bumped');
+assert.ok(sw.includes("const CACHE_NAME = 'dungeon-explorer-v10'"), 'cache version is bumped');
 assert.ok(js.includes("beforeinstallprompt"), 'PWA install prompt is handled');
 assert.ok(js.includes("appinstalled"), 'installed state is handled');
 assert.ok(html.includes('@media(max-width:430px)'), 'small-phone layout rules exist');
@@ -52,9 +52,14 @@ assert.ok(js.includes('function applyWeaponElementToHits('), 'elemental enchantm
 assert.ok(js.includes("e.venomTimer=Math.max(e.venomTimer||0,3)"), 'venom enchantment applies damage over time');
 assert.ok(js.includes("e.stun=Math.max(e.stun||0,.8)"), 'frost enchantment briefly freezes enemies');
 assert.ok(js.includes("Trap safely disarmed. No damage taken."), 'interacting with a trap disarms it safely');
+assert.ok(js.includes("e.frostSlow=Math.max(e.frostSlow||0,2.5)"), 'frost enchantment applies a slow status');
+assert.ok(js.includes("slowed.push([e,e.speed]);e.speed*=.48"), 'frost status reduces enemy movement speed');
+assert.ok(js.includes("l.type==='shard'"), 'crafting shard pickups are supported');
+assert.ok(js.includes("Guardian core recovered: +1 crafting shard."), 'boss kills reward crafting shards');
+assert.ok(js.includes("Elite salvage recovered: +1 crafting shard."), 'elite kills reward crafting shards');
 assert.ok(js.includes('function breakBarrel('), 'destructible barrels can drop loot');
 assert.ok(js.includes('SECRET PASSAGE FOUND!'), 'hidden passages reveal bonus treasure');
 assert.ok(js.includes('Spike trap!'), 'floor traps damage the player');
 assert.ok(js.includes("if(e.code==='KeyC')openCraftingBench()"), 'crafting has a keyboard shortcut');
-assert.ok(sw.includes('dungeon-explorer-v9'), 'offline cache is bumped for the expansion');
+assert.ok(sw.includes('dungeon-explorer-v10'), 'offline cache is bumped for the expansion');
 console.log('Dungeon Explorer smoke tests passed.');
