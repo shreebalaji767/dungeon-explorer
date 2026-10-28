@@ -4,7 +4,7 @@ A self-contained, static browser dungeon crawler built with vanilla JavaScript, 
 
 ## Features
 
-- Pseudo-3D first-person raycasting renderer with wall shading and billboard enemies/items
+- Pseudo-3D first-person top-down tile rendering renderer with wall shading and billboard enemies/items
 - Procedurally generated dungeon floors with rooms, corridors, loot, and exit stairs
 - Real-time movement, enemy pursuit, line-of-sight checks, melee attacks, critical hits, and damage feedback
 - Quickstep dodge with cooldown and brief invulnerability frames
