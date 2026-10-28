@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#10100f">
+<meta name="theme-color" content="#090b12">
 <meta name="description" content="Dungeon Explorer — a free, offline-ready retro dungeon crawler.">
 <link rel="manifest" href="./manifest.json">
 <link rel="icon" href="./favicon.svg" type="image/svg+xml">
@@ -48,6 +48,67 @@
 @media(max-width:760px){.topbar-tools{gap:6px}.topbar-tools>.subtle{display:none}.install-btn{padding:10px 11px;font-size:.76rem}.toolbar{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,115px),1fr))}.toolbar button{min-width:0;min-height:44px}.stage canvas{max-height:58dvh}.dialog{max-height:calc(100dvh - 32px)}}
 @media(max-width:430px){.topbar{align-items:center}.topbar-tools{flex-shrink:0}.install-btn{font-size:.68rem;padding:9px 8px}.brand{max-width:62%;letter-spacing:.015em;gap:7px}.brand>div:last-child{line-height:1.35}.brand .subtle{font-size:.58rem}.sigil{flex:0 0 26px;width:26px;height:26px}.landing-title{font-size:clamp(2rem,13vw,3.6rem)}.landing-kicker{letter-spacing:.1em}.landing-subtitle{letter-spacing:.06em}.landing-frame{width:100%;padding:18px 10px}.landing-actions{display:grid;grid-template-columns:1fr;gap:9px}.landing-actions button{width:100%;min-width:0;padding:13px 10px}.landing-scene{height:clamp(100px,28vw,150px)}.landing-stats{gap:5px}.landing-chip{font-size:.58rem;padding:5px 6px}.side{grid-template-columns:minmax(0,1fr)}.inventory-panel,.log-panel{grid-column:auto!important}.stage canvas{max-height:48dvh}.feature-row{align-items:flex-start}.feature-row .pill{max-width:100%;overflow-wrap:anywhere}}
 @media(max-height:560px) and (orientation:landscape){#retroLanding{align-items:start;padding:10px}.landing-frame{max-width:900px;padding:14px 22px}.landing-title{font-size:clamp(1.8rem,7vh,3.4rem);margin:8px 0}.landing-scene{height:90px;margin:8px auto}.landing-stats{margin:8px 0}.landing-actions{margin:8px 0}.landing-foot{margin-top:8px}.stage canvas{max-height:48dvh}.overlay{padding:6px}.dialog{max-height:calc(100dvh - 20px)}}
+
+
+/* FULL-SITE 16-BIT ARCADE RESTYLE */
+:root{color-scheme:dark;--bg:#090b12;--panel:#111521;--line:#46506a;--gold:#ffdc83;--muted:#a6b0cc;--red:#ff7777;--green:#8fe6a3;--blue:#80d9ff;--pixel-ink:#080b11;--pixel-purple:#2b2541;--pixel-orange:#bd6b3a}
+html,body{background-color:var(--bg);background-image:linear-gradient(90deg,#18203324 1px,transparent 1px),linear-gradient(#18203324 1px,transparent 1px),linear-gradient(180deg,#111827 0%,#090b12 48%,#10101a 100%);background-size:8px 8px,8px 8px,auto;color:#f7edc8}
+body{font-family:"Courier New",ui-monospace,monospace;letter-spacing:.015em}
+button,input,select,textarea{font-family:inherit;border-radius:0!important}
+button{border:2px solid #687493;background:#20283a;color:#f7edc8;box-shadow:3px 3px 0 #05070c;transition:background-color .08s,border-color .08s,transform .08s;image-rendering:pixelated}
+button:hover{border-color:var(--gold);background:#35415a;transform:translate(-1px,-1px);box-shadow:4px 4px 0 #05070c}
+button:active{transform:translate(2px,2px);box-shadow:1px 1px 0 #05070c}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,summary:focus-visible{outline:2px dashed var(--green);outline-offset:3px}
+.primary{background:#bd6b3a;border:2px solid #ffe2a0;color:#fff4d4;box-shadow:3px 3px 0 #56342e}
+.primary:hover{background:#d98548}
+.danger{border:2px solid #ff7777;color:#ffaaa0}
+.shell{position:relative}
+.topbar{border-bottom:3px solid #46506a;box-shadow:0 3px 0 #080b11;padding-bottom:12px}
+.brand{color:var(--gold);text-shadow:2px 2px 0 #56342e;letter-spacing:.09em}
+.sigil{border:2px solid var(--gold);background:#171b2a;box-shadow:3px 3px 0 #080b11}
+.stage{border:4px solid #687493;border-radius:0;box-shadow:6px 6px 0 #05070c, inset 0 0 0 3px #080b11;background:#080b11}
+.stage canvas{image-rendering:pixelated;image-rendering:crisp-edges}
+.overlay{background:#070913e8}
+.dialog{border:3px solid #d6a84f;background:#111521;box-shadow:6px 6px 0 #05070c, inset 0 0 0 2px #2b2541}
+.dialog h1,.panel h2,.controls-title,.toolbar button,.pill,.eyebrow{font-family:"Courier New",ui-monospace,monospace;text-transform:uppercase;letter-spacing:.08em}
+.dialog h1{color:#ffdc83;text-shadow:2px 2px 0 #8b472f}
+.dialog p{color:#c4c8df}
+.panel{border:2px solid #46506a;border-radius:0;background:repeating-linear-gradient(0deg,#111521 0 7px,#131827 7px 8px);box-shadow:4px 4px 0 #05070c;padding:13px}
+.panel h2{color:#8fe6a3;border-bottom:1px solid #46506a;padding-bottom:8px}
+.statline{font-variant-numeric:tabular-nums}
+.bar{height:10px;border:2px solid #46506a;border-radius:0;background:#080b11;margin-top:5px}
+.bar span{border-radius:0;transition:width .15s;box-shadow:inset 0 2px #ffffff35}
+.bar.xp span{background:repeating-linear-gradient(90deg,#80d9ff 0 7px,#55b9e9 7px 9px)}
+.bar.stamina span{background:repeating-linear-gradient(90deg,#ffdc83 0 7px,#d49b48 7px 9px)}
+.bar.enemy span{background:repeating-linear-gradient(90deg,#ff7777 0 7px,#d84d64 7px 9px)}
+.item{border:1px solid #46506a;background:#0d111c;border-radius:0;padding:9px}
+.item button,.rowbuttons button{border-width:1px;box-shadow:2px 2px 0 #05070c}
+.feed{color:#c4c8df;background:#0b0f19;border:1px solid #343e55;padding:7px}
+.feed div{border-bottom:1px dashed #343e55}
+.toolbar{gap:8px}
+.toolbar button{border:2px solid #687493;background:#20283a;min-height:42px}
+.mobile-controls{border:3px solid #46506a;border-radius:0;background:repeating-linear-gradient(0deg,#111521 0 7px,#151a29 7px 8px);box-shadow:4px 4px 0 #05070c}
+.mobile-controls button,.dpad button,.actions-pad button{border:2px solid #687493;border-radius:0;background:#20283a;box-shadow:3px 3px 0 #05070c}
+.mobile-controls button:active,.dpad button:active,.actions-pad button:active{background:#3c4a65}
+.controls-title{color:#8fe6a3}
+.feature-row .pill,.pill,.landing-chip{border-radius:0;border:1px solid #687493;background:#151b2a;color:#ffdc83}
+.key{border:2px solid #687493;border-bottom-width:4px;border-radius:0;background:#151b2a}
+select,input,textarea{background:#111521!important;color:#f7edc8!important;border:2px solid #687493!important;box-shadow:2px 2px 0 #05070c}
+details.hint{border:1px dashed #46506a;padding:10px;background:#0e121e}
+details.hint summary{font-weight:900;letter-spacing:.06em;text-transform:uppercase}
+.footer{border-top:1px dashed #343e55;color:#8c96b3}
+.install-btn{border:2px solid #9cf0bc!important;border-radius:0!important;background:#22533f!important;box-shadow:3px 3px 0 #05070c!important}
+.install-btn:hover{background:#2f7657!important}
+#retroLanding{background:#090b12}
+.landing-frame{border:4px solid #d6a84f;outline:2px solid #61452a;border-radius:0;box-shadow:0 0 0 8px #090b12,6px 6px 0 #05070c,0 0 60px #d6a84f22}
+.landing-scene{border:3px solid #687493;border-radius:0;image-rendering:pixelated}
+#landingPlay,#landingContinue{border-radius:0;box-shadow:4px 4px 0 #05070c}
+.landing-chip{background:#111521}
+*{scrollbar-color:#687493 #090b12;scrollbar-width:thin}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-track{background:#090b12;border-left:1px solid #343e55}
+::-webkit-scrollbar-thumb{background:#46506a;border:2px solid #090b12}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
 
 </style>
 </head>
