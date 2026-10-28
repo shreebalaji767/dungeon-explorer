@@ -1,5 +1,5 @@
 'use strict';
-const CACHE_NAME = 'dungeon-explorer-v9';
+const CACHE_NAME = 'dungeon-explorer-v10';
 const APP_SHELL = ['./', './index.html', './manifest.json', './favicon.svg'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL)).then(() => self.skipWaiting()));
