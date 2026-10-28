@@ -3,9 +3,10 @@ const fs = require('node:fs');
 const assert = require('node:assert/strict');
 
 const html = fs.readFileSync('index.html', 'utf8');
-const scriptMatch = html.match(/<script>([\\s\\S]*?)<\\/script>/i);
-assert.ok(scriptMatch, 'main game script exists');
-const js = scriptMatch[1];
+const scriptStart = html.indexOf('<script>');
+const scriptEnd = html.indexOf('</script>', scriptStart + 8);
+assert.ok(scriptStart >= 0 && scriptEnd > scriptStart, 'main game script exists');
+const js = html.slice(scriptStart + 8, scriptEnd);
 const sw = fs.readFileSync('service-worker.js', 'utf8');
 const manifest = JSON.parse(fs.readFileSync('manifest.json', 'utf8'));
 
